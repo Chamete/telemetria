@@ -1,0 +1,16 @@
+{
+  "name": "telemetria",
+  "owner": {
+    "name": "Chamete"
+  },
+  "metadata": {
+    "description": "Marketplace del mod Telemetría para Claude Code."
+  },
+  "plugins": [
+    {
+      "name": "telemetria",
+      "source": "./",
+      "description": "Panel sobre el prompt de Claude Code: contexto, caché, t/s, TTFT, estado MCP y límites de 5 horas y semanal, con alerta de contexto alto y atajo a /compact."
+    }
+  ]
+}
