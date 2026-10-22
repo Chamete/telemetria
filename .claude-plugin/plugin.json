@@ -1,6 +1,6 @@
 {
   "name": "telemetria",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Panel sobre el prompt con contexto, caché, t/s, TTFT, estado MCP y límites de 5 horas y semanal, con alerta de contexto alto.",
   "types": "./types/index.d.ts",
   "author": {

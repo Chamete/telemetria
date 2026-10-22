@@ -4,7 +4,7 @@ Un panel para **Claude Code** que se coloca encima del cuadro de texto y te mues
 
 ![Panel de telemetría en estado normal](docs/panel-normal.png)
 
-Cuando el contexto pasa del 75 %, el panel se pone en **modo alerta** y te propone compactar la conversación:
+Cuando el contexto llega al 70 %, el panel se pone en **modo alerta** y te recomienda compactar la conversación:
 
 ![Panel de telemetría en modo alerta](docs/panel-alerta.png)
 
@@ -50,13 +50,12 @@ Las dos barras de límites son **decrecientes**: empiezan llenas y se vacían co
 
 ### Modo alerta
 
-Si el contexto supera el **75 %** (más de 750k en una ventana de 1M):
+Si el contexto llega al **70 %** (700k en una ventana de 1M):
 
 - arriba del panel aparece el aviso *«Contexto saturado (78%). Ejecuta /compact para resumir y optimizar la sesión.»*;
-- el dónut y el porcentaje pasan de cian a ámbar, y el título a **CONTEXTO ALTO**;
-- debajo del panel aparece el botón **Escribir /compact en el prompt**.
+- el dónut y el porcentaje pasan de cian a ámbar, y el título a **CONTEXTO ALTO**.
 
-El botón escribe `/compact` en el cuadro de texto, pero **no lo ejecuta**: compactar resume toda la conversación y no se puede deshacer, así que lo confirmas tú con Enter. Si ya tienes algo escrito, no lo borra y te avisa.
+El resto del panel no cambia de tamaño. El mod solo avisa: `/compact` lo escribes tú cuando quieras, porque compactar resume toda la conversación y no se puede deshacer.
 
 ### Se adapta al ancho
 
@@ -90,7 +89,7 @@ Más detalle en [docs/como-funciona.md](docs/como-funciona.md).
 .claude-plugin/plugin.json        manifiesto del mod
 .claude-plugin/marketplace.json   este repositorio como marketplace
 hooks/hooks.json                  módulo de hooks que carga Claude Code
-hooks/register.tsx                datos, dibujo del panel y botón de /compact
+hooks/register.tsx                datos y dibujo del panel
 types/index.d.ts                  contrato de estado del mod
 tests/telemetria.test.tsx         pruebas
 ```

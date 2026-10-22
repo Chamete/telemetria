@@ -97,15 +97,8 @@ test('mide TTFT, tokens por segundo y caché de una respuesta', async ($, on) =>
   await ui.unmount()
 })
 
-test('por encima del 75 % de contexto: alerta ámbar, banner y botón que escribe /compact', async ($, on) => {
+test('con el contexto alto: alerta ámbar y banner, sin botones', async ($, on) => {
   preparar(on, { tokens: 780_000, window: 1_000_000, percent: 78 })
-  let borrador = ''
-  on('prompt.read', () => ({ value: { text: borrador, cursor: borrador.length } }))
-  on('prompt.fill', (_, e) => {
-    borrador = e.text
-    return { isFilled: true, text: borrador, cursor: borrador.length }
-  })
-  on('ui.toast', () => ({ value: {} }))
   await $.session.start({ cwd: '/p', surface: 'desktop', isInteractive: true })
 
   for (const surface of ['desktop', 'terminal'] as const) {
@@ -120,21 +113,18 @@ test('por encima del 75 % de contexto: alerta ámbar, banner y botón que escrib
     } else {
       expect(await ui.find({ type: 'Text', text: /Contexto saturado \(78%\)/ })).toBeDefined()
     }
-    await ui.press({ key: 'compact' })
-    expect(borrador).toBe('/compact')
-    borrador = ''
+    expect(await ui.find({ type: 'Button' })).toBeUndefined()
     await ui.unmount()
   }
 })
 
-test('por debajo del umbral no hay alerta ni botón', async ($, on) => {
+test('por debajo del umbral no hay alerta', async ($, on) => {
   preparar(on)
   await $.session.start({ cwd: '/p', surface: 'desktop', isInteractive: true })
   const ui = await $.ui.mount({ ...FRANJA, surface: 'desktop' })
   const fuente = String((await ui.find({ type: 'Svg' }))?.props.source)
   expect(fuente).not.toContain('Contexto saturado')
   expect(fuente).toContain('#22D3EE')
-  expect(await ui.find({ type: 'Button', key: 'compact' })).toBeUndefined()
   await ui.unmount()
 })
 
@@ -165,4 +155,20 @@ test('la alerta solo añade el banner: la caja de datos mide lo mismo', async ($
   const alerta = await altoActual()
   // 60 unidades: el alto del banner y nada más
   expect(alerta - normal).toBe(60)
+})
+
+test('el umbral es el 70 %, incluido: 69 % no avisa; 70 % y 75 % sí', async ($, on) => {
+  const contexto = { tokens: 0, window: 1_000_000, percent: 0 }
+  preparar(on, contexto)
+  const hayAlerta = async (percent: number) => {
+    Object.assign(contexto, { tokens: percent * 10_000, percent })
+    await $.session.start({ cwd: '/p', surface: 'desktop', isInteractive: true })
+    const ui = await $.ui.mount({ ...FRANJA, surface: 'desktop' })
+    const fuente = String((await ui.find({ type: 'Svg' }))?.props.source)
+    await ui.unmount()
+    return fuente.includes('Contexto saturado')
+  }
+  expect(await hayAlerta(69)).toBe(false)
+  expect(await hayAlerta(70)).toBe(true)
+  expect(await hayAlerta(75)).toBe(true)
 })

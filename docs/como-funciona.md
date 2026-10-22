@@ -6,7 +6,7 @@ Guía interna del mod para quien quiera entenderlo o modificarlo.
 
 | Archivo | Papel |
 |---|---|
-| `hooks/register.tsx` | El *hooks module*: recoge los datos, dibuja la franja y escribe `/compact`. |
+| `hooks/register.tsx` | El *hooks module*: recoge los datos y dibuja la franja. |
 | `types/index.d.ts` | Contrato de los valores que el mod guarda en `$.state`. |
 | `tests/telemetria.test.tsx` | Pruebas con el kit `claude-code/testing`. |
 
@@ -35,9 +35,9 @@ Cálculos:
   - Las dos primeras columnas miden lo que su contenido (400 y 250 unidades) y la de límites ocupa el resto.
   - Por debajo de ~70 columnas, las barras pasan debajo; por debajo de ~40, todo se apila.
 - **Terminal, VS Code y móvil:** una línea de `Text` con colores y barras `▰▱`.
-- **Modo alerta:** cuando el contexto supera `UMBRAL_CONTEXTO` (75 %).
+- **Modo alerta:** cuando el contexto llega a `UMBRAL_CONTEXTO` (70 %) o lo pasa.
   - Cambia el color del dónut a ámbar y añade el banner encima de la caja; el resto del panel mide lo mismo que sin alerta.
-  - Debajo del gráfico, un `Button` llama a `$.prompt.fill` con `/compact`. El SVG es una imagen y no admite clics.
+  - No hay botones: el aviso recomienda `/compact`, pero no lo escribe ni lo ejecuta.
 
 ## Colores
 
@@ -56,7 +56,7 @@ Cálculos:
 En `hooks/register.tsx`:
 
 ```ts
-const UMBRAL_CONTEXTO = 75        // % de contexto a partir del cual se avisa
+const UMBRAL_CONTEXTO = 70        // % de contexto a partir del cual se avisa (incluido)
 const UNIDADES_POR_COLUMNA = 15.5 // tamaño relativo del dibujo y cambio de diseño
 const ANCHO_COL_CONTEXTO = 400
 const ANCHO_COL_INFERENCIA = 250

@@ -75,8 +75,8 @@ type Vista = {
   semanaReinicio: string
 }
 
-// Por encima de este porcentaje de contexto (750k en una ventana de 1M) se avisa.
-const UMBRAL_CONTEXTO = 75
+// A partir de este porcentaje de contexto (700k en una ventana de 1M) se avisa.
+const UMBRAL_CONTEXTO = 70
 
 // Porcentaje disponible de un límite, de 0 a 100.
 const disponible = (usado: number) => Math.max(0, Math.min(100, Math.round(100 - usado)))
@@ -90,7 +90,8 @@ const prepararVista = (m: TelMedida, inf: TelInferencia, estadoMcp: TelMcp, ahor
     ctxTexto: `${miles(m.tokens)} / ${miles(m.ventana)}`,
     ctxUsado: miles(m.tokens),
     ctxVentana: miles(m.ventana),
-    alerta: pct !== null && pct > UMBRAL_CONTEXTO,
+    // «A partir de» el umbral: con `>` el 70 % justo no avisaba.
+    alerta: pct !== null && pct >= UMBRAL_CONTEXTO,
     cache: inf.cache === null ? '—' : `${Math.round(inf.cache)}%`,
     tps: inf.tps === null ? '—' : inf.tps.toFixed(1),
     ttft: inf.ttft === null ? '—' : inf.ttft >= 1000 ? `${(inf.ttft / 1000).toFixed(1)}s` : `${Math.round(inf.ttft)}ms`,
@@ -283,19 +284,6 @@ const textoAlternativo = (v: Vista) =>
     .filter(Boolean)
     .join(' · ')
 
-// Escribe /compact en el prompt para que la persona lo confirme con Enter: compactar
-// resume la conversación y no se deshace, así que no se ejecuta solo. Si ya hay un
-// borrador escrito, no se pisa.
-const prepararCompact = async ($: EngineInterface) => {
-  const borrador = await $.prompt.read().catch(() => ({ text: '' }))
-  if (borrador.text.trim() && borrador.text.trim() !== '/compact') {
-    $.ui.toast('Vacía el prompt y vuelve a pulsar para escribir /compact.')
-    return
-  }
-  const r = await $.prompt.fill({ text: '/compact', mode: 'replace' })
-  $.ui.toast(r.isFilled ? '/compact listo en el prompt: pulsa Enter para compactar.' : 'No se pudo escribir /compact en el prompt.')
-}
-
 // Barra de texto para la terminal: ▰▰▰▱▱
 const barraTexto = (pct: number | null, ancho: number) => {
   if (pct === null) return '─'.repeat(ancho)
@@ -364,21 +352,11 @@ export const register: Register = on => {
     const v = prepararVista(await read($, medida), await read($, inferencia), await read($, mcp), await $.clock.now())
     const tabla = $.ui.resolve(e)
 
-    const { Box, Text, Button } = tabla
-    const avisoCompact = v.alerta ? (
-      <Button key="compact" label="Escribir /compact en el prompt" variant="primary" onPress={() => void prepararCompact($)} />
-    ) : null
+    const { Box, Text } = tabla
 
+    // La alerta es solo el banner de arriba, dentro del propio panel: sin botones aparte.
     if (e.surface === 'desktop' && 'Svg' in tabla) {
-      const panel = <tabla.Svg source={svgFranja(v, e.props.bodyColumns)} alt={textoAlternativo(v)} />
-      return avisoCompact ? (
-        <Box flexDirection="column" gap="xs">
-          {panel}
-          {avisoCompact}
-        </Box>
-      ) : (
-        panel
-      )
+      return <tabla.Svg source={svgFranja(v, e.props.bodyColumns)} alt={textoAlternativo(v)} />
     }
 
     const col = e.props.bodyColumns
@@ -391,7 +369,6 @@ export const register: Register = on => {
             <Text color={AMBAR} weight="bold">
               (!) {TEXTO_ALERTA(v.ctxPct)}
             </Text>
-            {avisoCompact}
           </Box>
         )}
         <Box flexDirection="row" flexWrap="wrap" columnGap={2}>
