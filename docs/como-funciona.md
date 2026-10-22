@@ -36,7 +36,7 @@ Cálculos:
   - Por debajo de ~70 columnas, las barras pasan debajo; por debajo de ~40, todo se apila.
 - **Terminal, VS Code y móvil:** una línea de `Text` con colores y barras `▰▱`.
 - **Modo alerta:** cuando el contexto supera `UMBRAL_CONTEXTO` (75 %).
-  - Cambia el color del dónut a ámbar y añade el banner y la píldora.
+  - Cambia el color del dónut a ámbar y añade el banner encima de la caja; el resto del panel mide lo mismo que sin alerta.
   - Debajo del gráfico, un `Button` llama a `$.prompt.fill` con `/compact`. El SVG es una imagen y no admite clics.
 
 ## Colores

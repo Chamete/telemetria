@@ -147,3 +147,22 @@ test('con el ancho habitual de la app (~80 columnas) salen las tres columnas de 
   expect(fuente).toContain('x="710" y="')
   await ui.unmount()
 })
+
+test('la alerta solo añade el banner: la caja de datos mide lo mismo', async ($, on) => {
+  // El mismo objeto que lee el motor simulado: se cambia entre una medida y otra.
+  const contexto = { tokens: 84_000, window: 200_000, percent: 42 }
+  preparar(on, contexto)
+  const altoActual = async () => {
+    await $.session.start({ cwd: '/p', surface: 'desktop', isInteractive: true })
+    const ui = await $.ui.mount({ ...FRANJA, surface: 'desktop' })
+    const fuente = String((await ui.find({ type: 'Svg' }))?.props.source)
+    await ui.unmount()
+    expect(fuente).not.toContain('para liberar')
+    return Number(/viewBox="0 0 \d+ (\d+)"/.exec(fuente)?.[1])
+  }
+  const normal = await altoActual()
+  Object.assign(contexto, { tokens: 780_000, window: 1_000_000, percent: 78 })
+  const alerta = await altoActual()
+  // 60 unidades: el alto del banner y nada más
+  expect(alerta - normal).toBe(60)
+})

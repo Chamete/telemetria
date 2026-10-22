@@ -154,22 +154,17 @@ const barra = (x: number, y: number, w: number, titulo: string, derecha: string,
     <text x="${dentro ? x + 14 : x + lleno + 12}" y="${y + 34}" font-size="18" font-weight="500" fill="${C.blanco}" ${FUENTE}>${etiqueta}</text>`
 }
 
-// Columna 1: dónut; a su lado título, tokens y caché; en alerta, la píldora de /compact debajo.
-const altoContexto = (v: Vista) => (v.alerta ? 196 : 150)
-const bloqueContexto = (v: Vista, x: number, y: number, w: number) => {
+// Columna 1: dónut; a su lado título, tokens y caché. Mide lo mismo con y sin alerta:
+// el aviso solo se añade como banner encima de la caja.
+const ALTO_CONTEXTO = 150
+const bloqueContexto = (v: Vista, x: number, y: number) => {
   const tx = x + 142
   return `
     ${donut(x + 62, y + 70, 54, v.ctxPct, v.alerta)}
     <text x="${tx}" y="${y + 40}" font-size="17" font-weight="700" letter-spacing="0.3" fill="${v.alerta ? C.textoAmbar : C.grisClaro}" ${FUENTE}>${v.alerta ? 'CONTEXTO ALTO' : 'CONTEXTO'}</text>
     <text x="${tx}" y="${y + 80}" font-size="32" font-weight="500" fill="${C.blanco}" ${FUENTE}>${xml(v.ctxUsado)}<tspan font-size="28" font-weight="400" fill="${C.gris}"> / ${xml(v.ctxVentana)}</tspan></text>
     <rect x="${tx - 2}" y="${y + 96}" width="140" height="32" rx="8" fill="${C.pildora}"/>
-    <text x="${tx + 11}" y="${y + 118}" font-size="17" fill="${C.blanco}" ${FUENTE}>Caché: ${xml(v.cache)}</text>
-    ${
-      v.alerta
-        ? `<rect x="${x + 4}" y="${y + 148}" width="${Math.min(w - 8, 360)}" height="38" rx="9" fill="${AMBAR}" fill-opacity="0.10" stroke="${C.textoAmbar}" stroke-opacity="0.85"/>
-    <text x="${x + 18}" y="${y + 173}" font-size="17" font-weight="500" fill="${C.textoAmbar}" ${FUENTE}>⚠  Ejecuta /compact para liberar</text>`
-        : ''
-    }`
+    <text x="${tx + 11}" y="${y + 118}" font-size="17" fill="${C.blanco}" ${FUENTE}>Caché: ${xml(v.cache)}</text>`
 }
 
 // Columna 2: velocidad grande, TTFT en amarillo y estado MCP, centrados en vertical.
@@ -211,7 +206,7 @@ const svgFranja = (v: Vista, columnas: number) => {
   const W = Math.max(520, Math.min(2600, Math.round(columnas * UNIDADES_POR_COLUMNA)))
   const bh = v.alerta ? 60 : 0 // alto del banner
   const m = 30
-  const hCtx = altoContexto(v)
+  const hCtx = ALTO_CONTEXTO
   let cuerpo = ''
   let alto = 0
 
@@ -221,7 +216,7 @@ const svgFranja = (v: Vista, columnas: number) => {
     const y = bh + 22
     const h = Math.max(hCtx, ALTO_BARRAS)
     cuerpo = `
-      ${bloqueContexto(v, m, y, x2 - m - 24)}
+      ${bloqueContexto(v, m, y)}
       ${separadorV(x2, y, y + h)}
       ${bloqueInferencia(v, x2 + 32, y + h / 2, false)}
       ${separadorV(x3, y, y + h)}
@@ -232,7 +227,7 @@ const svgFranja = (v: Vista, columnas: number) => {
     const y = bh + 22
     const yb = y + hCtx + 22
     cuerpo = `
-      ${bloqueContexto(v, m, y, x2 - m - 24)}
+      ${bloqueContexto(v, m, y)}
       ${separadorV(x2, y, y + hCtx)}
       ${bloqueInferencia(v, x2 + 32, y + hCtx / 2, false)}
       ${separadorH(m, W - m, yb - 8)}
@@ -243,7 +238,7 @@ const svgFranja = (v: Vista, columnas: number) => {
     const yi = y + hCtx + 18
     const yb = yi + 46
     cuerpo = `
-      ${bloqueContexto(v, m, y, W - 2 * m)}
+      ${bloqueContexto(v, m, y)}
       ${separadorH(m, W - m, yi - 6)}
       ${bloqueInferencia(v, m, yi + 18, true)}
       ${separadorH(m, W - m, yb - 4)}
